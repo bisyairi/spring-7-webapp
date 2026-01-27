@@ -4,21 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @AllArgsConstructor
 @Builder
 @Data
-public class Coffee {
-    private UUID id;
+public class Customer {
+
+    private Integer id;
+    private String customerName;
     private Integer version;
-    private String coffeeName;
-    private CoffeeStyle coffeeStyle;
-    private String upc;
-    private Integer quantityOnHand;
-    private BigDecimal price;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
