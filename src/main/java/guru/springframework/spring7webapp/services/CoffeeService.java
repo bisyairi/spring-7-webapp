@@ -3,12 +3,13 @@ package guru.springframework.spring7webapp.services;
 import guru.springframework.spring7webapp.model.Coffee;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CoffeeService {
     List<Coffee> getAllCoffees();
 
-    Coffee getCoffeeById(UUID id);
+    Optional<Coffee> getCoffeeById(UUID id);
 
     Coffee saveNewCoffee(Coffee coffee);
 

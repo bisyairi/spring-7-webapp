@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -32,7 +33,7 @@ public class CoffeeController {
 
         log.debug("Getting coffee by id: {}", coffeeId.toString());
 
-        return coffeeService.getCoffeeById(coffeeId);
+        return coffeeService.getCoffeeById(coffeeId).orElseThrow(NotFoundException::new);
     }
 
     @PostMapping(COFFEE_BASE)
@@ -40,7 +41,7 @@ public class CoffeeController {
         Coffee savedCoffee = coffeeService.saveNewCoffee(coffee);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", COFFEE_BASE + "/" + savedCoffee.getId());
+        headers.add("Location", COFFEE_BASE + "/" + savedCoffee.getId().toString());
 
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }

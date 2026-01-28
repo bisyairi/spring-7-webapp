@@ -66,11 +66,11 @@ public class CoffeeServiceImpl implements CoffeeService {
     }
 
     @Override
-    public Coffee getCoffeeById(UUID id) {
+    public Optional<Coffee> getCoffeeById(UUID id) {
 
         log.debug("Getting coffee by id: {}", id.toString());
 
-        return coffeeMap.get(id);
+        return Optional.of(coffeeMap.get(id));
     }
 
     @Override

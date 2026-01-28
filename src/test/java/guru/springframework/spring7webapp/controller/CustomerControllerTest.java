@@ -16,8 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -71,7 +70,7 @@ class CustomerControllerTest {
     void getCustomerById() throws Exception {
         Customer customerTest = customerServiceImpl.getAllCustomers().getLast();
 
-        given(customerService.getCustomerById(customerTest.getId())).willReturn(customerTest);
+        given(customerService.getCustomerById(customerTest.getId())).willReturn(Optional.of(customerTest));
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, + customerTest.getId())
                 .accept(MediaType.APPLICATION_JSON))
@@ -140,5 +139,14 @@ class CustomerControllerTest {
 
         assertThat(integerArgumentCaptor.getValue()).isEqualTo(customerTest.getId());
         assertThat(customerArgumentCaptor.getValue().getCustomerName()).isEqualTo(customerMap.get("customerName"));
+    }
+
+    @Test
+    void getCoffeeByIdNotFound() throws Exception {
+
+        given(customerService.getCustomerById(any(Integer.class))).willReturn(Optional.empty());
+
+        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, new Random().nextInt()))
+                .andExpect(status().isNotFound());
     }
 }

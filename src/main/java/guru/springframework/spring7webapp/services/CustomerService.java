@@ -3,12 +3,13 @@ package guru.springframework.spring7webapp.services;
 import guru.springframework.spring7webapp.model.Customer;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CustomerService {
 
     List<Customer> getAllCustomers();
 
-    Customer getCustomerById(Integer id);
+    Optional<Customer> getCustomerById(Integer id);
 
     Customer createNewCustomer(Customer customer);
 

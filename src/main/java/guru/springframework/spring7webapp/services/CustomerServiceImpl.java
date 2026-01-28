@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -56,8 +53,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer getCustomerById(Integer id) {
-        return customerMap.get(id);
+    public Optional<Customer> getCustomerById(Integer id) {
+        return Optional.of(customerMap.get(id));
     }
 
     @Override

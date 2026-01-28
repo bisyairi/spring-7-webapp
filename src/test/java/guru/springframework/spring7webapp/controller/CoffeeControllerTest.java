@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,7 +70,7 @@ class CoffeeControllerTest {
 
         Coffee coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
 
-        given(coffeeService.getCoffeeById(coffeeTest.getId())).willReturn(coffeeTest);
+        given(coffeeService.getCoffeeById(coffeeTest.getId())).willReturn(Optional.of(coffeeTest));
 
         mockMvc.perform(get(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
                         .accept(MediaType.APPLICATION_JSON))
@@ -83,7 +84,7 @@ class CoffeeControllerTest {
     void createCoffee() throws Exception {
 
         Coffee coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
-        coffeeTest.setId(null);
+        coffeeTest.setId(UUID.randomUUID());
         coffeeTest.setVersion(null);
 
         given(coffeeService.saveNewCoffee(any(Coffee.class))).willReturn(coffeeServiceImpl.getAllCoffees().getFirst());
@@ -136,5 +137,14 @@ class CoffeeControllerTest {
 
         assertThat(coffeeTest.getId()).isEqualTo(uuidArgumentCaptor.getValue());
         assertThat(coffeeArgumentCaptor.getValue().getCoffeeName()).isEqualTo(coffeeTest.getCoffeeName());
+    }
+
+    @Test
+    void getCoffeeByIdNotFound() throws Exception {
+
+        given(coffeeService.getCoffeeById(any(UUID.class))).willReturn(Optional.empty());
+
+        mockMvc.perform(get(CoffeeController.COFFEE_BASE_ID, UUID.randomUUID()))
+                .andExpect(status().isNotFound());
     }
 }
