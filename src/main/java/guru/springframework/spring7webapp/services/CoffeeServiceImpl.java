@@ -4,6 +4,7 @@ import guru.springframework.spring7webapp.model.Coffee;
 import guru.springframework.spring7webapp.model.CoffeeStyle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -108,5 +109,18 @@ public class CoffeeServiceImpl implements CoffeeService {
     @Override
     public void deleteCoffeeById(UUID coffeeId) {
         coffeeMap.remove(coffeeId);
+    }
+
+    @Override
+    public void patchCoffeeById(UUID coffeeId, Coffee coffee) {
+        Coffee existingCoffee = coffeeMap.get(coffeeId);
+
+        if (StringUtils.hasText(coffee.getCoffeeName())) {
+            existingCoffee.setCoffeeName(coffee.getCoffeeName());
+        }
+
+        if (coffee.getVersion() != null) {
+            existingCoffee.setVersion(coffee.getVersion());
+        }
     }
 }
