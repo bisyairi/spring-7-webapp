@@ -1,21 +1,21 @@
 package guru.springframework.spring7webapp.services;
 
-import guru.springframework.spring7webapp.model.Customer;
+import guru.springframework.spring7webapp.model.CustomerDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface CustomerService {
 
-    List<Customer> getAllCustomers();
+    List<CustomerDTO> getAllCustomers();
 
-    Optional<Customer> getCustomerById(Integer id);
+    Optional<CustomerDTO> getCustomerById(Integer id);
 
-    Customer createNewCustomer(Customer customer);
+    CustomerDTO createNewCustomer(CustomerDTO customer);
 
-    void updateCustomerById(Integer customerId, Customer customer);
+    void updateCustomerById(Integer customerId, CustomerDTO customer);
 
     void deleteCustomerById(Integer customerId);
 
-    void patchCustomerById(Integer customerId, Customer customerUpdates);
+    void patchCustomerById(Integer customerId, CustomerDTO customerUpdates);
 }

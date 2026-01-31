@@ -1,6 +1,6 @@
 package guru.springframework.spring7webapp.controller;
 
-import guru.springframework.spring7webapp.model.Coffee;
+import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.services.CoffeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -24,12 +23,12 @@ public class CoffeeController {
     private final CoffeeService coffeeService;
 
     @GetMapping(value = COFFEE_BASE)
-    public List<Coffee> getAllCoffees(){
+    public List<CoffeeDTO> getAllCoffees(){
         return coffeeService.getAllCoffees();
     }
 
     @GetMapping(value = COFFEE_BASE_ID)
-    public Coffee getCoffeeById(@PathVariable("coffeeId") UUID coffeeId){
+    public CoffeeDTO getCoffeeById(@PathVariable("coffeeId") UUID coffeeId){
 
         log.debug("Getting coffee by id: {}", coffeeId.toString());
 
@@ -37,8 +36,8 @@ public class CoffeeController {
     }
 
     @PostMapping(COFFEE_BASE)
-    public ResponseEntity<Void> createCoffee(@RequestBody Coffee coffee){
-        Coffee savedCoffee = coffeeService.saveNewCoffee(coffee);
+    public ResponseEntity<Void> createCoffee(@RequestBody CoffeeDTO coffee){
+        CoffeeDTO savedCoffee = coffeeService.saveNewCoffee(coffee);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", COFFEE_BASE + "/" + savedCoffee.getId().toString());
@@ -47,21 +46,26 @@ public class CoffeeController {
     }
 
     @PutMapping(COFFEE_BASE_ID)
-    public ResponseEntity<Void> updateCoffee(@PathVariable("coffeeId")UUID coffeeId, @RequestBody Coffee coffee){
+    public ResponseEntity<Void> updateCoffee(@PathVariable("coffeeId")UUID coffeeId, @RequestBody CoffeeDTO coffee){
 
-        coffeeService.updateCoffeeById(coffeeId, coffee);
+        if (coffeeService.updateCoffeeById(coffeeId, coffee).isEmpty()){
+            throw new NotFoundException();
+        };
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping(COFFEE_BASE_ID)
     public ResponseEntity<Void> removeCoffee(@PathVariable("coffeeId") UUID coffeeId){
-        coffeeService.deleteCoffeeById(coffeeId);
+        if (!coffeeService.deleteCoffeeById(coffeeId)){
+            throw new NotFoundException();
+        }
+
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping(COFFEE_BASE_ID)
-    public ResponseEntity<Void> patchCoffee(@PathVariable("coffeeId") UUID coffeeId, @RequestBody Coffee coffee){
+    public ResponseEntity<Void> patchCoffee(@PathVariable("coffeeId") UUID coffeeId, @RequestBody CoffeeDTO coffee){
         coffeeService.patchCoffeeById(coffeeId, coffee);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

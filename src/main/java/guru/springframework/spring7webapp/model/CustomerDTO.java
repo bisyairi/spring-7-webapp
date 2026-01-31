@@ -7,10 +7,10 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.LocalDateTime;
 
-@JsonDeserialize(builder = Customer.CustomerBuilder.class)
+@JsonDeserialize(builder = CustomerDTO.CustomerDTOBuilder.class)
 @Builder
 @Data
-public class Customer {
+public class CustomerDTO {
 
     @JsonProperty("id")
     private Integer id;

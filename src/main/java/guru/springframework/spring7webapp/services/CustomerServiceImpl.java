@@ -1,6 +1,6 @@
 package guru.springframework.spring7webapp.services;
 
-import guru.springframework.spring7webapp.model.Customer;
+import guru.springframework.spring7webapp.model.CustomerDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -12,12 +12,12 @@ import java.util.*;
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
-    private Map<Integer, Customer> customerMap;
+    private Map<Integer, CustomerDTO> customerMap;
 
     public CustomerServiceImpl() {
         this.customerMap = new HashMap<>();
 
-        Customer customer1 = Customer.builder().
+        CustomerDTO customer1 = CustomerDTO.builder().
                 id(1).
                 customerName("Iwan").
                 version(1).
@@ -25,7 +25,7 @@ public class CustomerServiceImpl implements CustomerService {
                 updatedAt(LocalDateTime.now()).
                 build();
 
-        Customer customer2 = Customer.builder().
+        CustomerDTO customer2 = CustomerDTO.builder().
                 id(2).
                 customerName("Afiq").
                 version(1).
@@ -33,7 +33,7 @@ public class CustomerServiceImpl implements CustomerService {
                 updatedAt(LocalDateTime.now()).
                 build();
 
-        Customer customer3 = Customer.builder().
+        CustomerDTO customer3 = CustomerDTO.builder().
                 id(3).
                 customerName("Atan").
                 version(1).
@@ -48,18 +48,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> getAllCustomers() {
+    public List<CustomerDTO> getAllCustomers() {
         return new ArrayList<>(customerMap.values());
     }
 
     @Override
-    public Optional<Customer> getCustomerById(Integer id) {
+    public Optional<CustomerDTO> getCustomerById(Integer id) {
         return Optional.of(customerMap.get(id));
     }
 
     @Override
-    public Customer createNewCustomer(Customer customer) {
-        Customer savedCustomer = Customer.builder()
+    public CustomerDTO createNewCustomer(CustomerDTO customer) {
+        CustomerDTO savedCustomer = CustomerDTO.builder()
                 .id(customer.getId())
                 .customerName(customer.getCustomerName())
                 .version(customer.getVersion())
@@ -72,8 +72,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateCustomerById(Integer customerId, Customer customer) {
-        Customer existingCustomer = customerMap.get(customerId);
+    public void updateCustomerById(Integer customerId, CustomerDTO customer) {
+        CustomerDTO existingCustomer = customerMap.get(customerId);
 
         existingCustomer.setCustomerName(customer.getCustomerName());
         existingCustomer.setUpdatedAt(LocalDateTime.now());
@@ -87,8 +87,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void patchCustomerById(Integer customerId, Customer customer) {
-        Customer existingCustomer = customerMap.get(customerId);
+    public void patchCustomerById(Integer customerId, CustomerDTO customer) {
+        CustomerDTO existingCustomer = customerMap.get(customerId);
 
         if (StringUtils.hasText(customer.getCustomerName())) {
             existingCustomer.setCustomerName(customer.getCustomerName());

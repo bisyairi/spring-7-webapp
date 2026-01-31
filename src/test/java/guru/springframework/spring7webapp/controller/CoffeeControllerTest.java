@@ -1,6 +1,6 @@
 package guru.springframework.spring7webapp.controller;
 
-import guru.springframework.spring7webapp.model.Coffee;
+import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.services.CoffeeService;
 import guru.springframework.spring7webapp.services.CoffeeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class CoffeeControllerTest {
     ArgumentCaptor<UUID> uuidArgumentCaptor;
 
     @Captor
-    ArgumentCaptor<Coffee> coffeeArgumentCaptor;
+    ArgumentCaptor<CoffeeDTO> coffeeArgumentCaptor;
 
     @MockitoBean
     CoffeeService coffeeService;
@@ -68,7 +68,7 @@ class CoffeeControllerTest {
     @Test
     void getCoffeeById() throws Exception {
 
-        Coffee coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
+        CoffeeDTO coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
 
         given(coffeeService.getCoffeeById(coffeeTest.getId())).willReturn(Optional.of(coffeeTest));
 
@@ -83,11 +83,11 @@ class CoffeeControllerTest {
     @Test
     void createCoffee() throws Exception {
 
-        Coffee coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
+        CoffeeDTO coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
         coffeeTest.setId(UUID.randomUUID());
         coffeeTest.setVersion(null);
 
-        given(coffeeService.saveNewCoffee(any(Coffee.class))).willReturn(coffeeServiceImpl.getAllCoffees().getFirst());
+        given(coffeeService.saveNewCoffee(any(CoffeeDTO.class))).willReturn(coffeeServiceImpl.getAllCoffees().getFirst());
 
         mockMvc.perform(post(CoffeeController.COFFEE_BASE)
                         .accept(MediaType.APPLICATION_JSON)
@@ -99,7 +99,9 @@ class CoffeeControllerTest {
 
     @Test
     void updateCoffee() throws Exception {
-        Coffee coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
+        CoffeeDTO coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
+
+        given(coffeeService.updateCoffeeById(any(), any())).willReturn(Optional.of(coffeeTest));
 
         mockMvc.perform(put(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
                         .accept(MediaType.APPLICATION_JSON)
@@ -107,12 +109,14 @@ class CoffeeControllerTest {
                         .content(objectMapper.writeValueAsString(coffeeTest)))
                 .andExpect(status().isNoContent());
 
-        verify(coffeeService).updateCoffeeById(any(UUID.class), any(Coffee.class));
+        verify(coffeeService).updateCoffeeById(any(UUID.class), any(CoffeeDTO.class));
     }
 
     @Test
     void deleteCoffee() throws Exception {
-        Coffee coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
+        CoffeeDTO coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
+
+        given(coffeeService.deleteCoffeeById(any(UUID.class))).willReturn(true);
 
         mockMvc.perform(delete(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -125,7 +129,7 @@ class CoffeeControllerTest {
 
     @Test
     void patchCoffee() throws Exception {
-        Coffee coffeeTest = coffeeServiceImpl.getAllCoffees().get(0);
+        CoffeeDTO coffeeTest = coffeeServiceImpl.getAllCoffees().get(0);
 
         mockMvc.perform(patch(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
                         .accept(MediaType.APPLICATION_JSON)

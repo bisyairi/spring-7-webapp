@@ -1,6 +1,6 @@
 package guru.springframework.spring7webapp.controller;
 
-import guru.springframework.spring7webapp.model.Customer;
+import guru.springframework.spring7webapp.model.CustomerDTO;
 import guru.springframework.spring7webapp.services.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,20 +22,20 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping(CUSTOMER_PATH)
-    public List<Customer> getAllCustomers(){
+    public List<CustomerDTO> getAllCustomers(){
         log.debug("Getting all customers");
         return customerService.getAllCustomers();
     }
 
     @GetMapping(CUSTOMER_PATH_ID)
-    public Customer getCustomerById(@PathVariable("customerId") Integer customerId){
+    public CustomerDTO getCustomerById(@PathVariable("customerId") Integer customerId){
         log.debug("Getting customer by id: {}", customerId);
         return customerService.getCustomerById(customerId).orElseThrow(NotFoundException::new);
     }
 
     @PostMapping(CUSTOMER_PATH)
-    public ResponseEntity<Void> createNewCustomer(@RequestBody Customer customer){
-        Customer savedCustomer = customerService.createNewCustomer(customer);
+    public ResponseEntity<Void> createNewCustomer(@RequestBody CustomerDTO customer){
+        CustomerDTO savedCustomer = customerService.createNewCustomer(customer);
         log.debug("Creating new customer: {}", savedCustomer.toString());
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", CUSTOMER_PATH + "/" + savedCustomer.getId());
@@ -43,7 +43,7 @@ public class CustomerController {
     }
 
     @PutMapping(CUSTOMER_PATH_ID)
-    public ResponseEntity<Void> updateCustomerById(@PathVariable("customerId")Integer customerId, @RequestBody Customer customer){
+    public ResponseEntity<Void> updateCustomerById(@PathVariable("customerId")Integer customerId, @RequestBody CustomerDTO customer){
         customerService.updateCustomerById(customerId, customer);
         log.debug("Updating customer with id: {}", customerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -57,7 +57,7 @@ public class CustomerController {
     }
 
     @PatchMapping(CUSTOMER_PATH_ID)
-    public ResponseEntity<Void> partialUpdateCustomerById(@PathVariable("customerId") Integer customerId, @RequestBody Customer customer) {
+    public ResponseEntity<Void> partialUpdateCustomerById(@PathVariable("customerId") Integer customerId, @RequestBody CustomerDTO customer) {
         customerService.patchCustomerById(customerId, customer);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

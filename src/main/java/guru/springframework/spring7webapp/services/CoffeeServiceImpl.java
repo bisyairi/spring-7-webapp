@@ -1,6 +1,6 @@
 package guru.springframework.spring7webapp.services;
 
-import guru.springframework.spring7webapp.model.Coffee;
+import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.model.CoffeeStyle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,12 +14,12 @@ import java.util.*;
 @Service
 public class CoffeeServiceImpl implements CoffeeService {
 
-    private final Map<UUID, Coffee> coffeeMap;
+    private final Map<UUID, CoffeeDTO> coffeeMap;
 
     public CoffeeServiceImpl() {
         this.coffeeMap = new HashMap<>();
 
-        Coffee coffee1 = Coffee.builder().
+        CoffeeDTO coffee1 = CoffeeDTO.builder().
                 id(UUID.randomUUID()).
                 version(1).
                 coffeeName("Spanish Latte").
@@ -31,7 +31,7 @@ public class CoffeeServiceImpl implements CoffeeService {
                 updatedAt(LocalDateTime.now()).
                 build();
 
-        Coffee coffee2 = Coffee.builder().
+        CoffeeDTO coffee2 = CoffeeDTO.builder().
                 id(UUID.randomUUID()).
                 version(1).
                 coffeeName("Mocha Frappe").
@@ -43,7 +43,7 @@ public class CoffeeServiceImpl implements CoffeeService {
                 updatedAt(LocalDateTime.now()).
                 build();
 
-        Coffee coffee3 = Coffee.builder().
+        CoffeeDTO coffee3 = CoffeeDTO.builder().
                 id(UUID.randomUUID()).
                 version(1).
                 coffeeName("Zero Latte").
@@ -61,12 +61,12 @@ public class CoffeeServiceImpl implements CoffeeService {
     }
 
     @Override
-    public List<Coffee> getAllCoffees(){
+    public List<CoffeeDTO> getAllCoffees(){
         return new ArrayList<>(coffeeMap.values());
     }
 
     @Override
-    public Optional<Coffee> getCoffeeById(UUID id) {
+    public Optional<CoffeeDTO> getCoffeeById(UUID id) {
 
         log.debug("Getting coffee by id: {}", id.toString());
 
@@ -74,8 +74,8 @@ public class CoffeeServiceImpl implements CoffeeService {
     }
 
     @Override
-    public Coffee saveNewCoffee(Coffee coffee) {
-        Coffee savedCoffee = Coffee.builder()
+    public CoffeeDTO saveNewCoffee(CoffeeDTO coffee) {
+        CoffeeDTO savedCoffee = CoffeeDTO.builder()
                 .id(UUID.randomUUID())
                 .version(coffee.getVersion())
                 .coffeeName(coffee.getCoffeeName())
@@ -92,8 +92,8 @@ public class CoffeeServiceImpl implements CoffeeService {
     }
 
     @Override
-    public void updateCoffeeById(UUID coffeeId, Coffee coffee) {
-        Coffee existingCoffee = coffeeMap.get(coffeeId);
+    public Optional<CoffeeDTO> updateCoffeeById(UUID coffeeId, CoffeeDTO coffee) {
+        CoffeeDTO existingCoffee = coffeeMap.get(coffeeId);
 
         if (existingCoffee == null) {
             throw new IllegalArgumentException("Coffee not found with id: " + coffeeId);
@@ -104,16 +104,20 @@ public class CoffeeServiceImpl implements CoffeeService {
         existingCoffee.setQuantityOnHand(coffee.getQuantityOnHand());
         existingCoffee.setPrice(coffee.getPrice());
         existingCoffee.setUpdatedAt(LocalDateTime.now());
+
+        return Optional.of(existingCoffee);
     }
 
     @Override
-    public void deleteCoffeeById(UUID coffeeId) {
+    public Boolean deleteCoffeeById(UUID coffeeId) {
         coffeeMap.remove(coffeeId);
+
+        return true;
     }
 
     @Override
-    public void patchCoffeeById(UUID coffeeId, Coffee coffee) {
-        Coffee existingCoffee = coffeeMap.get(coffeeId);
+    public void patchCoffeeById(UUID coffeeId, CoffeeDTO coffee) {
+        CoffeeDTO existingCoffee = coffeeMap.get(coffeeId);
 
         if (StringUtils.hasText(coffee.getCoffeeName())) {
             existingCoffee.setCoffeeName(coffee.getCoffeeName());

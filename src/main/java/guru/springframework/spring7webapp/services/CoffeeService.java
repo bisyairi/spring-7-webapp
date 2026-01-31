@@ -1,21 +1,21 @@
 package guru.springframework.spring7webapp.services;
 
-import guru.springframework.spring7webapp.model.Coffee;
+import guru.springframework.spring7webapp.model.CoffeeDTO;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface CoffeeService {
-    List<Coffee> getAllCoffees();
+    List<CoffeeDTO> getAllCoffees();
 
-    Optional<Coffee> getCoffeeById(UUID id);
+    Optional<CoffeeDTO> getCoffeeById(UUID id);
 
-    Coffee saveNewCoffee(Coffee coffee);
+    CoffeeDTO saveNewCoffee(CoffeeDTO coffee);
 
-    void updateCoffeeById(UUID id, Coffee coffee);
+    Optional<CoffeeDTO> updateCoffeeById(UUID id, CoffeeDTO coffee);
 
-    void deleteCoffeeById(UUID coffeeId);
+    Boolean deleteCoffeeById(UUID coffeeId);
 
-    void patchCoffeeById(UUID coffeeId, Coffee coffeeUpdates);
+    void patchCoffeeById(UUID coffeeId, CoffeeDTO coffeeUpdates);
 }
