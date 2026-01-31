@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class CoffeeController {
     }
 
     @PostMapping(COFFEE_BASE)
-    public ResponseEntity<Void> createCoffee(@RequestBody CoffeeDTO coffee){
+    public ResponseEntity<Void> createCoffee(@Validated @RequestBody CoffeeDTO coffee){
         CoffeeDTO savedCoffee = coffeeService.saveNewCoffee(coffee);
 
         HttpHeaders headers = new HttpHeaders();
@@ -46,7 +47,7 @@ public class CoffeeController {
     }
 
     @PutMapping(COFFEE_BASE_ID)
-    public ResponseEntity<Void> updateCoffee(@PathVariable("coffeeId")UUID coffeeId, @RequestBody CoffeeDTO coffee){
+    public ResponseEntity<Void> updateCoffee(@PathVariable("coffeeId")UUID coffeeId, @Validated @RequestBody CoffeeDTO coffee){
 
         if (coffeeService.updateCoffeeById(coffeeId, coffee).isEmpty()){
             throw new NotFoundException();
@@ -65,7 +66,7 @@ public class CoffeeController {
     }
 
     @PatchMapping(COFFEE_BASE_ID)
-    public ResponseEntity<Void> patchCoffee(@PathVariable("coffeeId") UUID coffeeId, @RequestBody CoffeeDTO coffee){
+    public ResponseEntity<Void> patchCoffee(@PathVariable("coffeeId") UUID coffeeId,@Validated @RequestBody CoffeeDTO coffee){
         coffeeService.patchCoffeeById(coffeeId, coffee);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

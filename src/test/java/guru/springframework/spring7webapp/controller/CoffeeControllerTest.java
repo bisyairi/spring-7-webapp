@@ -3,6 +3,7 @@ package guru.springframework.spring7webapp.controller;
 import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.services.CoffeeService;
 import guru.springframework.spring7webapp.services.CoffeeServiceImpl;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,10 +13,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -129,18 +134,21 @@ class CoffeeControllerTest {
 
     @Test
     void patchCoffee() throws Exception {
-        CoffeeDTO coffeeTest = coffeeServiceImpl.getAllCoffees().get(0);
+        CoffeeDTO coffeeTest = coffeeServiceImpl.getAllCoffees().getFirst();
+
+        Map<String, Object> coffeeMap = new HashMap<>();
+        coffeeMap.put("coffeeName", "New Name");
 
         mockMvc.perform(patch(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(coffeeTest)))
+                        .content(objectMapper.writeValueAsString(coffeeMap)))
                 .andExpect(status().isNoContent());
 
         verify(coffeeService).patchCoffeeById(uuidArgumentCaptor.capture(), coffeeArgumentCaptor.capture());
 
         assertThat(coffeeTest.getId()).isEqualTo(uuidArgumentCaptor.getValue());
-        assertThat(coffeeArgumentCaptor.getValue().getCoffeeName()).isEqualTo(coffeeTest.getCoffeeName());
+        assertThat(coffeeMap.get("coffeeName")).isEqualTo(coffeeArgumentCaptor.getValue().getCoffeeName());
     }
 
     @Test
@@ -151,4 +159,42 @@ class CoffeeControllerTest {
         mockMvc.perform(get(CoffeeController.COFFEE_BASE_ID, UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void testCreateCoffeeNullName() throws Exception {
+        CoffeeDTO coffeeDTO = CoffeeDTO.builder()
+                .coffeeName(null)
+                .build();
+
+        given(coffeeService.saveNewCoffee(any(CoffeeDTO.class))).willReturn(coffeeServiceImpl.getAllCoffees().getFirst());
+
+        MvcResult mvcResult = mockMvc.perform(post(CoffeeController.COFFEE_BASE).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(coffeeDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()", is(2)))
+                .andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    void testUpdateCoffeeBlankName() throws Exception {
+        CoffeeDTO coffeeDTO = coffeeServiceImpl.getAllCoffees().getFirst();
+        coffeeDTO.setCoffeeName("");
+
+        given(coffeeService.updateCoffeeById(any(), any())).willReturn(Optional.of(coffeeDTO));
+
+        MvcResult mvcResult = mockMvc.perform(put(CoffeeController.COFFEE_BASE_ID, coffeeDTO.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(coffeeDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.length()", is(1)))
+                .andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
+    }
+
+
 }

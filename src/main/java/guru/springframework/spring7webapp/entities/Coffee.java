@@ -1,7 +1,11 @@
 package guru.springframework.spring7webapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import guru.springframework.spring7webapp.model.CoffeeStyle;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +31,14 @@ public class Coffee {
 
     @Version
     private Integer version;
+
+    @NotBlank
+    @NotNull
+    @Size(max = 50)
+    @Column(length = 50)
+    @JsonProperty("coffeeName")
     private String coffeeName;
+
     private CoffeeStyle coffeeStyle;
     private String upc;
     private Integer quantityOnHand;

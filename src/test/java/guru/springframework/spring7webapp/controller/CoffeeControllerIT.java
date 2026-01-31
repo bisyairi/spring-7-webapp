@@ -5,18 +5,28 @@ import guru.springframework.spring7webapp.mappers.CoffeeMapper;
 import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.repositories.CoffeeRepository;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 class CoffeeControllerIT {
@@ -29,6 +39,19 @@ class CoffeeControllerIT {
 
     @Autowired
     CoffeeMapper coffeeMapper;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @Autowired
+    WebApplicationContext wac;
+
+    MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
 
     @Test
     void getAllCoffees() {
@@ -122,5 +145,19 @@ class CoffeeControllerIT {
     void testDeleteNotFound() {
         assertThrows(NotFoundException.class,
                 () -> coffeeController.removeCoffee(UUID.randomUUID()));
+    }
+
+    @Test
+    void testPatchBadCoffeeName() throws Exception {
+        Coffee coffee = coffeeRepository.findAll().getFirst();
+
+        Map<String, Object> coffeeMap = new HashMap<>();
+        coffeeMap.put("coffeeName", "A very very very long coffee name that is more than 50 characters");
+
+        mockMvc.perform(patch(CoffeeController.COFFEE_BASE_ID, coffee.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(coffeeMap))
+                ).andExpect(status().isBadRequest());
     }
 }

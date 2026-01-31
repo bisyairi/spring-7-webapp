@@ -1,6 +1,10 @@
 package guru.springframework.spring7webapp.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -20,6 +24,10 @@ public class CoffeeDTO {
     @JsonProperty("version")
     private Integer version;
 
+    @NotBlank
+    @NotNull
+    @Size(max = 50)
+    @Column(length = 50)
     @JsonProperty("coffeeName")
     private String coffeeName;
 
