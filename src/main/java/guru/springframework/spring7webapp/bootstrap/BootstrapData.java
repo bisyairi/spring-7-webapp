@@ -2,27 +2,54 @@ package guru.springframework.spring7webapp.bootstrap;
 
 import guru.springframework.spring7webapp.entities.Coffee;
 import guru.springframework.spring7webapp.entities.Customer;
+import guru.springframework.spring7webapp.model.CoffeeCSVRecord;
 import guru.springframework.spring7webapp.model.CoffeeStyle;
 import guru.springframework.spring7webapp.repositories.CoffeeRepository;
 import guru.springframework.spring7webapp.repositories.CustomerRepository;
+import guru.springframework.spring7webapp.services.CoffeeCsvService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Component
 public class BootstrapData implements CommandLineRunner {
     private final CoffeeRepository coffeeRepository;
     private final CustomerRepository customerRepository;
+    private final CoffeeCsvService coffeeCsvService;
 
+    @Transactional
     @Override
     public void run(String... args) throws Exception {
         loadCoffeeData();
+        loadCsvData();
         loadCustomerData();
+    }
+
+    private void loadCsvData() throws FileNotFoundException {
+        System.out.println(coffeeRepository.count());
+        if (coffeeRepository.count() < 5) {
+            File file = ResourceUtils.getFile("classpath:csvdata/coffees.csv");
+
+            List<CoffeeCSVRecord> records = coffeeCsvService.convertCsv(file);
+
+            records.forEach(coffeeCSVRecord -> {
+                coffeeRepository.save(Coffee.builder()
+                                .coffeeName(coffeeCSVRecord.getCoffeeName())
+                                .coffeeDetail(coffeeCSVRecord.getCoffeeDetail())
+                                .price(BigDecimal.TEN)
+                        .build());
+            });
+        }
     }
 
     private void loadCoffeeData() {
@@ -85,6 +112,4 @@ public class BootstrapData implements CommandLineRunner {
 
         customerRepository.saveAll(Arrays.asList(customer1, customer2, customer3));
     }
-
-
 }

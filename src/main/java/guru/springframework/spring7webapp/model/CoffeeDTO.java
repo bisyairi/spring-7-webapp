@@ -34,6 +34,9 @@ public class CoffeeDTO {
     @JsonProperty("coffeeStyle")
     private CoffeeStyle coffeeStyle;
 
+    @JsonProperty("coffeeDetail")
+    private String coffeeDetail;
+
     @JsonProperty("upc")
     private String upc;
 

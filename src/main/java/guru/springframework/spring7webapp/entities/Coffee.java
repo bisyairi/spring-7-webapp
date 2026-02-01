@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
@@ -45,9 +47,14 @@ public class Coffee {
     @JdbcTypeCode(SqlTypes.SMALLINT)
     private CoffeeStyle coffeeStyle;
 
+    private String coffeeDetail;
     private String upc;
     private Integer quantityOnHand;
     private BigDecimal price;
+
+    @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }
