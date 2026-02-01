@@ -22,6 +22,10 @@ public class Customer {
     @Version
     private Integer version;
     private String customerName;
+
+    @Column(unique = true)
+    private String customerEmail;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
@@ -43,7 +42,9 @@ public class Coffee {
     @JsonProperty("coffeeName")
     private String coffeeName;
 
+    @JdbcTypeCode(SqlTypes.SMALLINT)
     private CoffeeStyle coffeeStyle;
+
     private String upc;
     private Integer quantityOnHand;
     private BigDecimal price;
