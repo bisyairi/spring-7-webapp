@@ -3,6 +3,8 @@ package guru.springframework.spring7webapp.services;
 import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.model.CoffeeStyle;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -61,8 +63,8 @@ public class CoffeeServiceImpl implements CoffeeService {
     }
 
     @Override
-    public List<CoffeeDTO> getAllCoffees(){
-        return new ArrayList<>(coffeeMap.values());
+    public Page<CoffeeDTO> getAllCoffees(String name, Integer pageNumber, Integer pageSize){
+        return new PageImpl<>(new ArrayList<>(coffeeMap.values()));
     }
 
     @Override

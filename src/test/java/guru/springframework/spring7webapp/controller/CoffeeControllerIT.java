@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +26,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -55,9 +60,18 @@ class CoffeeControllerIT {
 
     @Test
     void getAllCoffees() {
-        List<CoffeeDTO> coffeeDTOS = coffeeController.getAllCoffees();
+        Page<CoffeeDTO> coffeeDTOS = coffeeController.getAllCoffees(null, 1, 25);
 
-        assertThat(coffeeDTOS).size().isEqualTo(3);
+        assertThat(coffeeDTOS.getContent().size()).isEqualTo(25);
+    }
+
+    @Test
+    void testListCoffeesByName() throws Exception {
+        mockMvc.perform(get(CoffeeController.COFFEE_BASE)
+                        .queryParam("name", "Latte")
+                        .queryParam("pageSize", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.size()", is(2)));
     }
 
     @Transactional
@@ -65,7 +79,7 @@ class CoffeeControllerIT {
     @Test
     void testEmptyList() {
         coffeeRepository.deleteAll();
-        List<CoffeeDTO> coffeeDTOS = coffeeController.getAllCoffees();
+        Page<CoffeeDTO> coffeeDTOS = coffeeController.getAllCoffees(null, 1, 25);
 
         assertThat(coffeeDTOS).size().isEqualTo(0);
     }

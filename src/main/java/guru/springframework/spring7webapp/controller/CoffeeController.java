@@ -4,6 +4,7 @@ import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.services.CoffeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,11 @@ public class CoffeeController {
     private final CoffeeService coffeeService;
 
     @GetMapping(value = COFFEE_BASE)
-    public List<CoffeeDTO> getAllCoffees(){
-        return coffeeService.getAllCoffees();
+    public Page<CoffeeDTO> getAllCoffees(@RequestParam(required = false) String name,
+                                         @RequestParam(required = false) Integer pageNumber,
+                                         @RequestParam(required = false) Integer pageSize
+                                         ){
+        return coffeeService.getAllCoffees(name, pageNumber, pageSize);
     }
 
     @GetMapping(value = COFFEE_BASE_ID)
