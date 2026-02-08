@@ -1,5 +1,6 @@
 package guru.springframework.spring7webapp.controller;
 
+import guru.springframework.spring7webapp.config.SpringSecConfig;
 import guru.springframework.spring7webapp.model.CoffeeDTO;
 import guru.springframework.spring7webapp.services.CoffeeService;
 import guru.springframework.spring7webapp.services.CoffeeServiceImpl;
@@ -11,7 +12,13 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -27,15 +34,20 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CoffeeController.class)
 @ExtendWith(MockitoExtension.class)
+@Import(SpringSecConfig.class)
 class CoffeeControllerTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @MockitoBean
+    UserDetailsService userDetailsService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -56,6 +68,15 @@ class CoffeeControllerTest {
         coffeeServiceImpl = new CoffeeServiceImpl();
     }
 
+    @BeforeEach
+    void setUpSecurity() {
+        UserDetails user = User.withUsername("user")
+                .password("{noop}password")
+                .roles("USER").build();
+
+        given(userDetailsService.loadUserByUsername("user")).willReturn(user);
+    }
+
     @Test
     void getAllCoffees() throws Exception {
 
@@ -63,6 +84,7 @@ class CoffeeControllerTest {
                 .willReturn(coffeeServiceImpl.getAllCoffees(null, null, null));
 
         mockMvc.perform(get(CoffeeController.COFFEE_BASE)
+                        .with(httpBasic("user", "password"))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -77,6 +99,7 @@ class CoffeeControllerTest {
         given(coffeeService.getCoffeeById(coffeeTest.getId())).willReturn(Optional.of(coffeeTest));
 
         mockMvc.perform(get(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
+                        .with(httpBasic("user", "password"))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -95,6 +118,7 @@ class CoffeeControllerTest {
                 .willReturn(coffeeServiceImpl.getAllCoffees(null, 1, 25).getContent().getFirst());
 
         mockMvc.perform(post(CoffeeController.COFFEE_BASE)
+                        .with(httpBasic("user", "password"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(coffeeTest)))
@@ -109,6 +133,7 @@ class CoffeeControllerTest {
         given(coffeeService.updateCoffeeById(any(), any())).willReturn(Optional.of(coffeeTest));
 
         mockMvc.perform(put(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
+                        .with(httpBasic("user", "password"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(coffeeTest)))
@@ -124,6 +149,7 @@ class CoffeeControllerTest {
         given(coffeeService.deleteCoffeeById(any(UUID.class))).willReturn(true);
 
         mockMvc.perform(delete(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
+                .with(httpBasic("user", "password"))
                 .accept(MediaType.APPLICATION_JSON)
         ).andExpect(status().isNoContent());
 
@@ -140,6 +166,7 @@ class CoffeeControllerTest {
         coffeeMap.put("coffeeName", "New Name");
 
         mockMvc.perform(patch(CoffeeController.COFFEE_BASE_ID, coffeeTest.getId())
+                        .with(httpBasic("user", "password"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(coffeeMap)))
@@ -156,7 +183,8 @@ class CoffeeControllerTest {
 
         given(coffeeService.getCoffeeById(any(UUID.class))).willReturn(Optional.empty());
 
-        mockMvc.perform(get(CoffeeController.COFFEE_BASE_ID, UUID.randomUUID()))
+        mockMvc.perform(get(CoffeeController.COFFEE_BASE_ID, UUID.randomUUID())
+                        .with(httpBasic("user", "password")))
                 .andExpect(status().isNotFound());
     }
 
@@ -169,7 +197,9 @@ class CoffeeControllerTest {
         given(coffeeService.saveNewCoffee(any(CoffeeDTO.class)))
                 .willReturn(coffeeServiceImpl.getAllCoffees(null, 1, 25).getContent().getFirst());
 
-        MvcResult mvcResult = mockMvc.perform(post(CoffeeController.COFFEE_BASE).accept(MediaType.APPLICATION_JSON)
+        MvcResult mvcResult = mockMvc.perform(post(CoffeeController.COFFEE_BASE)
+                        .with(httpBasic("user", "password"))
+                        .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(coffeeDTO)))
                 .andExpect(status().isBadRequest())
@@ -187,6 +217,7 @@ class CoffeeControllerTest {
         given(coffeeService.updateCoffeeById(any(), any())).willReturn(Optional.of(coffeeDTO));
 
         MvcResult mvcResult = mockMvc.perform(put(CoffeeController.COFFEE_BASE_ID, coffeeDTO.getId())
+                        .with(httpBasic("user", "password"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(coffeeDTO)))

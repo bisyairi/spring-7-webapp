@@ -37,7 +37,7 @@ public class CoffeeController {
 
         log.debug("Getting coffee by id: {}", coffeeId.toString());
 
-        return coffeeService.getCoffeeById(coffeeId).orElseThrow(NotFoundException::new);
+        return coffeeService.getCoffeeById(coffeeId).orElseThrow(() -> new NotFoundException("Coffee Not Found"));
     }
 
     @PostMapping(COFFEE_BASE)

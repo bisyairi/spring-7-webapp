@@ -28,6 +28,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,7 +57,9 @@ class CoffeeControllerIT {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+                .apply(springSecurity())
+                .build();
     }
 
     @Test
@@ -68,6 +72,7 @@ class CoffeeControllerIT {
     @Test
     void testListCoffeesByName() throws Exception {
         mockMvc.perform(get(CoffeeController.COFFEE_BASE)
+                        .with(httpBasic("user", "password"))
                         .queryParam("name", "Latte")
                         .queryParam("pageSize", "5"))
                 .andExpect(status().isOk())
@@ -169,6 +174,7 @@ class CoffeeControllerIT {
         coffeeMap.put("coffeeName", "A very very very long coffee name that is more than 50 characters");
 
         mockMvc.perform(patch(CoffeeController.COFFEE_BASE_ID, coffee.getId())
+                        .with(httpBasic("user", "password"))
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(coffeeMap))
