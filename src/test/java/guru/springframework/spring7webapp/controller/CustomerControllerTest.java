@@ -1,5 +1,6 @@
 package guru.springframework.spring7webapp.controller;
 
+import guru.springframework.spring7webapp.config.SpringSecConfig;
 import guru.springframework.spring7webapp.model.CustomerDTO;
 import guru.springframework.spring7webapp.services.CustomerService;
 import guru.springframework.spring7webapp.services.CustomerServiceImpl;
@@ -11,6 +12,7 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CustomerController.class)
 @ExtendWith(MockitoExtension.class)
+@Import(SpringSecConfig.class)
 class CustomerControllerTest {
 
     @Autowired
@@ -59,7 +62,8 @@ class CustomerControllerTest {
         given(customerService.getAllCustomers()).willReturn(customerServiceImpl.getAllCustomers());
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH)
-                .accept(MediaType.APPLICATION_JSON))
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()", is(3))
@@ -73,7 +77,8 @@ class CustomerControllerTest {
         given(customerService.getCustomerById(customerTest.getId())).willReturn(Optional.of(customerTest));
 
         mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, + customerTest.getId())
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(customerTest.getId()))
@@ -89,6 +94,7 @@ class CustomerControllerTest {
         given(customerService.createNewCustomer(any(CustomerDTO.class))).willReturn(customerServiceImpl.getAllCustomers().getFirst());
 
         mockMvc.perform(post(CustomerController.CUSTOMER_PATH)
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(customerTest))
@@ -101,6 +107,7 @@ class CustomerControllerTest {
         CustomerDTO customerTest = customerServiceImpl.getAllCustomers().getFirst();
 
         mockMvc.perform(put(CustomerController.CUSTOMER_PATH_ID, customerTest.getId())
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(customerTest))
@@ -114,6 +121,7 @@ class CustomerControllerTest {
         CustomerDTO customerTest = customerServiceImpl.getAllCustomers().getFirst();
 
         mockMvc.perform(delete(CustomerController.CUSTOMER_PATH_ID, customerTest.getId())
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isNoContent());
 
@@ -128,6 +136,7 @@ class CustomerControllerTest {
         customerMap.put("customerName", "New Customer Name");
 
         mockMvc.perform(patch( CustomerController.CUSTOMER_PATH_ID, customerTest.getId())
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(customerMap))
@@ -146,7 +155,8 @@ class CustomerControllerTest {
 
         given(customerService.getCustomerById(any(Integer.class))).willReturn(Optional.empty());
 
-        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, new Random().nextInt()))
+        mockMvc.perform(get(CustomerController.CUSTOMER_PATH_ID, new Random().nextInt())
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor))
                 .andExpect(status().isNotFound());
     }
 }

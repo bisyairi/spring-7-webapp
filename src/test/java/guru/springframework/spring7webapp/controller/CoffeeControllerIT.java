@@ -72,7 +72,7 @@ class CoffeeControllerIT {
     @Test
     void testListCoffeesByName() throws Exception {
         mockMvc.perform(get(CoffeeController.COFFEE_BASE)
-                        .with(httpBasic("user", "password"))
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor)
                         .queryParam("name", "Latte")
                         .queryParam("pageSize", "5"))
                 .andExpect(status().isOk())
@@ -174,7 +174,7 @@ class CoffeeControllerIT {
         coffeeMap.put("coffeeName", "A very very very long coffee name that is more than 50 characters");
 
         mockMvc.perform(patch(CoffeeController.COFFEE_BASE_ID, coffee.getId())
-                        .with(httpBasic("user", "password"))
+                        .with(CoffeeControllerTest.jwtRequestPostProcessor)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(coffeeMap))
